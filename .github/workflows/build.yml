@@ -34,32 +34,29 @@ jobs:
 
     - name: Create version_info.txt
       run: |
-        @echo VSVersionInfo( > version_info.txt
-        @echo   ffi=FixedFileInfo( >> version_info.txt
-        @echo     filevers=(1, 1, 0, 0), >> version_info.txt
-        @echo     prodvers=(1, 1, 0, 0), >> version_info.txt
-        @echo     mask=0x3f, >> version_info.txt
-        @echo     flags=0x0, >> version_info.txt
-        @echo     OS=0x40004, >> version_info.txt
-        @echo     fileType=0x1, >> version_info.txt
-        @echo     subtype=0x0, >> version_info.txt
-        @echo     date=(0, 0) >> version_info.txt
-        @echo     ) >> version_info.txt
-        @echo   kids=[ >> version_info.txt
-        @echo     StringFileInfo( >> version_info.txt
-        @echo       [ >> version_info.txt
-        @echo       StringTable( >> version_info.txt
-        @echo         u'040904B0', >> version_info.txt
-        @echo         [StringStruct(u'CompanyName', u'OBS YOLO AimBot'), >> version_info.txt
-        @echo         StringStruct(u'FileDescription', u'OBS YOLO Pose AimBot'), >> version_info.txt
-        @echo         StringStruct(u'FileVersion', u'1.1.0'), >> version_info.txt
-        @echo         StringStruct(u'InternalName', u'OBS_AimBot'), >> version_info.txt
-        @echo         StringStruct(u'LegalCopyright', u'Open Source'), >> version_info.txt
-        @echo         StringStruct(u'OriginalFilename', u'OBS_AimBot.exe'), >> version_info.txt
-        @echo         StringStruct(u'ProductName', u'OBS YOLO AimBot'), >> version_info.txt
-        @echo         StringStruct(u'ProductVersion', u'1.1.0')])])]) >> version_info.txt
-        @echo   VarFileInfo([VarStruct(u'Translation', [0x409, 1200])]) >> version_info.txt
-        @echo ) >> version_info.txt
+        python -c "
+import sys
+sys.path.insert(0, 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages')
+from PyInstaller.utils.win32.versioninfo import VSVersionInfo, FixedFileInfo, StringFileInfo, StringTable, StringStruct, VarFileInfo, VarStruct
+info = VSVersionInfo(
+  ffi=FixedFileInfo(filevers=(1,1,0,0), prodvers=(1,1,0,0), mask=0x3f, flags=0, OS=0x40004, fileType=0x1, subtype=0, date=(0,0)),
+  kids=[
+    StringFileInfo([StringTable('040904B0', [
+      StringStruct('CompanyName', 'OBS YOLO AimBot'),
+      StringStruct('FileDescription', 'OBS YOLO Pose AimBot'),
+      StringStruct('FileVersion', '1.1.0'),
+      StringStruct('InternalName', 'OBS_AimBot'),
+      StringStruct('LegalCopyright', 'Open Source'),
+      StringStruct('OriginalFilename', 'OBS_AimBot.exe'),
+      StringStruct('ProductName', 'OBS YOLO AimBot'),
+      StringStruct('ProductVersion', '1.1.0')
+    ])]),
+    VarFileInfo([VarStruct('Translation', [0x409, 1200])])
+  ])
+with open('version_info.txt', 'w') as f:
+    f.write(str(info))
+print('version_info.txt created successfully')
+"""
 
     - name: Build executable with PyInstaller
       run: |

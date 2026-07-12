@@ -1021,7 +1021,17 @@ class AimBot:
         
         print("[Init] Loading YOLO model...")
         self.model = YOLO(config.model_path)
-        self.model.to(config.device)
+        # 自動轉換 device 字串: "0" -> "cuda:0"
+        device = config.device
+        if device.isdigit():
+            device = f"cuda:{device}"
+        try:
+            self.model.to(device)
+        except Exception as e:
+            print(f"[Init] GPU not available: {e}, falling back to CPU")
+            self.model.to("cpu")
+            device = "cpu"
+        self._device = device
         if config.half and config.device != "cpu":
             self.model.model.half()
         
@@ -1063,8 +1073,8 @@ class AimBot:
             conf=self.config.conf_thresh,
             iou=self.config.iou_thresh,
             imgsz=self.config.imgsz,
-            half=self.config.half and self.config.device != "cpu",
-            device=self.config.device,
+            half=self.config.half and "cuda" in getattr(self, "_device", "cpu"),
+            device=getattr(self, "_device", self.config.device),
             classes=[0],
         )
         

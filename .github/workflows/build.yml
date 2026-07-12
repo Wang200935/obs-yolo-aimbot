@@ -13,6 +13,10 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
 
+    defaults:
+      run:
+        shell: cmd
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -29,7 +33,6 @@ jobs:
         pip install pyinstaller
 
     - name: Build executable with PyInstaller
-      shell: cmd
       run: |
         pyinstaller --onefile --windowed --name "OBS_AimBot" ^
           --version-file version_info.txt ^
@@ -42,7 +45,6 @@ jobs:
           aimbot.py
 
     - name: Create ZIP archive
-      shell: cmd
       run: |
         7z a OBS_AimBot_v1.1.0.zip -mx=9 dist/OBS_AimBot.exe
         dir OBS_AimBot_v1.1.0.zip

@@ -33,29 +33,14 @@ jobs:
         pip install pyinstaller
 
     - name: Build executable with PyInstaller (onedir mode)
-      run: |
-        pyinstaller --onedir --windowed --name "OBS_AimBot" ^
-          --version-file version_info.txt ^
-          --hidden-import=ultralytics ^
-          --hidden-import=cv2 ^
-          --hidden-import=numpy ^
-          --hidden-import=tkinter ^
-          --hidden-import=pynput ^
-          --hidden-import=torch ^
-          --hidden-import=torchvision ^
-          --hidden-import=ultralytics.nn.tasks ^
-          --hidden-import=ultralytics.models.yolo.detect ^
-          --hidden-import=ultralytics.models.yolo.pose ^
-          --collect-all=ultralytics ^
-          --collect-all=torch ^
-          --collect-all=torchvision ^
-          --add-data "requirements.txt;." ^
-          aimbot.py
+      shell: cmd
+      run: pyinstaller --onedir --windowed --name "OBS_AimBot" --version-file version_info.txt --hidden-import=ultralytics --hidden-import=cv2 --hidden-import=numpy --hidden-import=tkinter --hidden-import=pynput --hidden-import=torch --hidden-import=torchvision --hidden-import=ultralytics.nn.tasks --hidden-import=ultralytics.models.yolo.detect --hidden-import=ultralytics.models.yolo.pose --collect-all=ultralytics --collect-all=torch --collect-all=torchvision --add-data "requirements.txt;." aimbot.py
 
-    - name: Create ZIP archive
+    - name: Create ZIP archive using PowerShell
+      shell: pwsh
       run: |
-        7z a OBS_AimBot_v1.1.0.zip -mx=9 dist/OBS_AimBot
-        dir dist/OBS_AimBot
+        Compress-Archive -Path dist/OBS_AimBot -DestinationPath OBS_AimBot_v1.1.0.zip -CompressionLevel Optimal
+        Get-Item OBS_AimBot_v1.1.0.zip | Select-Object Name,Length
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4

@@ -35,7 +35,6 @@ jobs:
     - name: Build executable with PyInstaller
       run: |
         pyinstaller --onefile --windowed --name "OBS_AimBot" ^
-          --version-file version_info.txt ^
           --hidden-import=ultralytics ^
           --hidden-import=cv2 ^
           --hidden-import=numpy ^

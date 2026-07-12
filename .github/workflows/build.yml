@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -25,11 +28,8 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
 
-    - name: Download YOLO model (optional, for size reduction)
-      run: |
-        python -c "from ultralytics import YOLO; YOLO('yolo11n-pose.pt')"
-
     - name: Build executable with PyInstaller
+      shell: cmd
       run: |
         pyinstaller --onefile --windowed --name "OBS_AimBot" ^
           --hidden-import=ultralytics ^
@@ -46,10 +46,3 @@ jobs:
         name: OBS_AimBot_Windows
         path: dist/OBS_AimBot.exe
         retention-days: 30
-
-    - name: Create Release (on tag)
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: dist/OBS_AimBot.exe
-        generate_release_notes: true

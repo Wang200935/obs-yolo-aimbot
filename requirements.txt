@@ -1,0 +1,18 @@
+# OBS YOLO AimBot Dependencies
+ultralytics>=8.4.0
+opencv-python>=4.9.0
+numpy>=1.24.0
+
+# Platform-specific mouse backends
+# Linux: uinput (preferred) or XTest
+# evdev>=1.6.0; sys_platform == "linux"
+# python-xlib>=0.33; sys_platform == "linux"
+
+# macOS: CoreGraphics via PyObjC
+# pyobjc-framework-Quartz>=10.0; sys_platform == "darwin"
+
+# Windows: ctypes (built-in)
+# No extra dependencies needed
+
+# Optional: NDI support
+# ndi-python>=1.0; extra == "ndi"

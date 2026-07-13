@@ -292,6 +292,8 @@ class MouseBackend:
             self._disp.close()
 
 
+        self._start_bot()
+
 # 滑鼠側鍵監聽器
 class SideButtonListener:
     def __init__(self, on_toggle):

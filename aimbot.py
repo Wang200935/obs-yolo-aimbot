@@ -1063,10 +1063,22 @@ class AimBotGUI:
             self.bot.cleanup()
             self.bot = None
         self.enabled = False
+        self._preview_frame = None
         self.status_var.set("已停止")
         self.status_label.configure(foreground="gray")
         self.toggle_btn.configure(text="啟用")
         self._log("瞄準輔助已停止")
+    
+    def _show_preview(self, annotated):
+        """回調：從背景線程接收預覽畫面，儲存供主線程顯示"""
+        self._preview_frame = annotated.copy()
+    
+    def _update_preview(self):
+        """主線程：定期更新 OpenCV 預覽窗口"""
+        if self._preview_frame is not None:
+            cv2.imshow("OBS YOLO AimBot Preview", self._preview_frame)
+            cv2.waitKey(1)
+        self.root.after(16, self._update_preview)  # ~60 FPS
     
     def _start_bot(self):
         if self.bot:
@@ -1090,12 +1102,14 @@ class AimBotGUI:
             self.bot = AimBot(self.config)
             self.bot.enabled = False
             
-            # 啟動主循環，並開啟 OpenCV 預覽窗口
-            def show_preview(annotated):
-                cv2.imshow("OBS YOLO AimBot Preview", annotated)
-                cv2.waitKey(1)
+            # 啟動主循環，預覽畫面透過 tkinter 主線程更新
+            self.bot.run(frame_callback=self._show_preview)
             
-            self.bot.run(frame_callback=show_preview)
+            # 啟動 OpenCV 預覽窗口 (必須在主線程)
+            cv2.namedWindow("OBS YOLO AimBot Preview", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("OBS YOLO AimBot Preview", 640, 360)
+            self._preview_frame = None
+            self._update_preview()
             self._log("瞄準輔助初始化成功")
             self._log(f"螢幕解析度: {self.bot.screen_w}x{self.bot.screen_h}")
             self._log(f"來源: {self.bot.obs.source_type}")
@@ -1168,6 +1182,7 @@ class AimBotGUI:
             self.bot.cleanup()
         if self.side_listener:
             self.side_listener.stop()
+        self._preview_frame = None
         cv2.destroyAllWindows()
         self.root.destroy()
     

@@ -32,10 +32,6 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
 
-    - name: Install Visual C++ Redistributable (for runtime)
-      run: |
-        # VC++ runtime is included in windows-latest
-
     - name: Build executable with PyInstaller (onedir mode - better DLL handling)
       shell: cmd
       run: |

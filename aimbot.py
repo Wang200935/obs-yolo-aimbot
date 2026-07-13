@@ -771,6 +771,15 @@ class AimBot:
         self.obs = OBSCapture(config.obs_source)
         self.obs.open()
         
+        # 初始化 YOLO (自動檢測 CPU/CUDA)
+        import torch as _torch
+        if _torch.cuda.is_available():
+            self._device = "cuda:0"
+            print(f"[Init] CUDA 可用: {_torch.cuda.get_device_name(0)}")
+        else:
+            self._device = "cpu"
+            print("[Init] 使用 CPU (無 CUDA)")
+        
         self.model = YOLO(config.model_path)
         self.model.conf = config.conf_thresh
         self.model.iou = config.iou_thresh
@@ -799,8 +808,8 @@ class AimBot:
         ]
     
     def process_frame(self, frame: np.ndarray) -> Tuple[np.ndarray, bool]:
-        results = self.model(frame, imgsz=self.config.imgsz, device=self.config.device, 
-                           half=self.config.half, verbose=False)
+        results = self.model(frame, imgsz=self.config.imgsz, device=getattr(self, '_device', 'cpu'), 
+                           half=False, verbose=False)
         
         annotated = frame.copy()
         fired = False

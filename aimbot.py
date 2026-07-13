@@ -919,6 +919,8 @@ class AimBotGUI:
         self.enabled = False
         self.side_listener = None
         
+        self._preview_frame = None
+        
         self._init_gui()
         self._init_side_button()
     

@@ -868,6 +868,35 @@ class AimBot:
         self.mouse.close()
         cv2.destroyAllWindows()
         print("[Run] Cleaned up")
+    
+    def run(self, frame_callback=None):
+        """主循環：不斷讀取 OBS 畫面、推理、瞄準"""
+        import threading
+        print("[Run] 開始主循環...")
+        self.running = True
+        
+        def loop():
+            while self.running:
+                try:
+                    ret, frame = self.obs.read()
+                    if not ret:
+                        time.sleep(0.005)
+                        continue
+                    annotated, _ = self.process_frame(frame)
+                    if frame_callback:
+                        frame_callback(annotated)
+                except Exception as e:
+                    print(f"[Run] 錯誤: {e}")
+                    time.sleep(0.1)
+            print("[Run] 主循環結束")
+        
+        self._loop_thread = threading.Thread(target=loop, daemon=True)
+        self._loop_thread.start()
+    
+    def stop(self):
+        self.running = False
+        if hasattr(self, '_loop_thread') and self._loop_thread.is_alive():
+            self._loop_thread.join(timeout=2.0)
 
 
 # GUI

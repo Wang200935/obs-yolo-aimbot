@@ -1084,6 +1084,13 @@ class AimBotGUI:
             
             self.bot = AimBot(self.config)
             self.bot.enabled = False
+            
+            # 啟動主循環，並開啟 OpenCV 預覽窗口
+            def show_preview(annotated):
+                cv2.imshow("OBS YOLO AimBot Preview", annotated)
+                cv2.waitKey(1)
+            
+            self.bot.run(frame_callback=show_preview)
             self._log("瞄準輔助初始化成功")
             self._log(f"螢幕解析度: {self.bot.screen_w}x{self.bot.screen_h}")
             self._log(f"來源: {self.bot.obs.source_type}")
@@ -1152,19 +1159,23 @@ class AimBotGUI:
     
     def _on_close(self):
         if self.bot:
+            self.bot.stop()
             self.bot.cleanup()
         if self.side_listener:
             self.side_listener.stop()
+        cv2.destroyAllWindows()
         self.root.destroy()
     
     def run(self):
-        self._start_bot()
+        # _start_bot 已在 __init__ 中調用
         self.root.mainloop()
         
         if self.side_listener:
             self.side_listener.stop()
         if self.bot:
+            self.bot.stop()
             self.bot.cleanup()
+        cv2.destroyAllWindows()
 
 
 def main():

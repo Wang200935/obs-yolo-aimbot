@@ -1071,6 +1071,7 @@ class AimBotGUI:
     
     def _stop_bot(self):
         if self.bot:
+            self.bot.stop()
             self.bot.cleanup()
             self.bot = None
         self.enabled = False

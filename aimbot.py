@@ -933,6 +933,9 @@ class AimBotGUI:
         
         self._build_ui()
         self._update_status_label()
+        
+        # 啟動 AimBot 主循環
+        self._start_bot()
     
     def _build_ui(self):
         title_frame = ttk.Frame(self.root, padding=10)

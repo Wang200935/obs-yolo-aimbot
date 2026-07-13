@@ -11,7 +11,7 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     defaults:
       run:
@@ -32,14 +32,45 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
 
-    - name: Build executable with PyInstaller (onedir mode)
+    - name: Install Visual C++ Redistributable (for runtime)
+      run: |
+        # VC++ runtime is included in windows-latest
+
+    - name: Build executable with PyInstaller (onedir mode - better DLL handling)
       shell: cmd
-      run: pyinstaller --onedir --windowed --name "OBS_AimBot" --version-file version_info.txt --hidden-import=ultralytics --hidden-import=cv2 --hidden-import=numpy --hidden-import=tkinter --hidden-import=pynput --hidden-import=torch --hidden-import=torchvision --hidden-import=ultralytics.nn.tasks --hidden-import=ultralytics.models.yolo.detect --hidden-import=ultralytics.models.yolo.pose --collect-all=ultralytics --collect-all=torch --collect-all=torchvision --add-data "requirements.txt;." aimbot.py
+      run: |
+        pyinstaller --onedir --windowed --noconfirm --clean ^
+          --name "OBS_AimBot" ^
+          --version-file version_info.txt ^
+          --hidden-import=ultralytics ^
+          --hidden-import=cv2 ^
+          --hidden-import=numpy ^
+          --hidden-import=tkinter ^
+          --hidden-import=pynput ^
+          --hidden-import=torch ^
+          --hidden-import=torchvision ^
+          --hidden-import=ultralytics.nn.tasks ^
+          --hidden-import=ultralytics.models.yolo.detect ^
+          --hidden-import=ultralytics.models.yolo.pose ^
+          --collect-all=ultralytics ^
+          --collect-all=torch ^
+          --collect-all=torchvision ^
+          --collect-binaries=opencv-python ^
+          --collect-binaries=numpy ^
+          --collect-binaries=torch ^
+          --add-data "requirements.txt;." ^
+          aimbot.py
+
+    - name: Verify DLLs in build
+      shell: cmd
+      run: |
+        dir dist\OBS_AimBot\*.dll
+        dir dist\OBS_AimBot\_internal\*.dll /s /b | find /c ".dll"
 
     - name: Create ZIP archive using PowerShell
       shell: pwsh
       run: |
-        Compress-Archive -Path dist/OBS_AimBot -DestinationPath OBS_AimBot_v1.1.0.zip -CompressionLevel Optimal
+        Compress-Archive -Path dist\OBS_AimBot -DestinationPath OBS_AimBot_v1.1.0.zip -CompressionLevel Optimal
         Get-Item OBS_AimBot_v1.1.0.zip | Select-Object Name,Length
 
     - name: Upload artifact
@@ -48,3 +79,4 @@ jobs:
         name: OBS_AimBot_Windows
         path: OBS_AimBot_v1.1.0.zip
         retention-days: 30
+
